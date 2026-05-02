@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#0D1B40;color:#fff;min-height:100vh}
+  .app{max-width:900px;margin:0 auto;padding:24px 20px}
+
+  /* header */
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+  .logo{font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.5px}
+  .logo span{color:#00C2FF}
+  .badge{background:#132252;border:1px solid #1B3F8B;color:#A8B8D8;font-size:11px;padding:3px 10px;border-radius:20px}
+
+  /* tabs */
+  .tabs{display:flex;gap:4px;background:#132252;padding:4px;border-radius:10px;margin-bottom:24px}
+  .tab{flex:1;padding:8px 12px;border:none;border-radius:7px;font-size:13px;cursor:pointer;font-weight:500;transition:all .2s;background:transparent;color:#A8B8D8}
+  .tab.active{background:#1B3F8B;color:#fff}
+  .tab:hover:not(.active){background:#1a2d5a;color:#fff}
+
+  /* demo area */
+  .demo-card{background:#132252;border:1px solid #1B3F8B;border-radius:14px;padding:24px;margin-bottom:16px}
+  .demo-label{font-size:11px;color:#A8B8D8;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+
+  /* input area */
+  .input-wrap{position:relative}
+  .input-wrap textarea{width:100%;background:#0D1B40;border:1.5px solid #1B3F8B;border-radius:10px;color:#fff;font-size:14px;padding:14px 120px 14px 16px;resize:none;font-family:inherit;line-height:1.5;outline:none;transition:border-color .2s}
+  .input-wrap textarea:focus{border-color:#00C2FF}
+  .input-wrap textarea::placeholder{color:#4a5a7a}
+  .btn-analyse{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#00C2FF;color:#0D1B40;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+  .btn-analyse:hover{background:#33CFFF}
+
+  /* signal badges */
+  .signals{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
+  .signal{display:flex;align-items:center;gap:6px;background:#0D1B40;border:1px solid #1B3F8B;border-radius:20px;padding:5px 12px;font-size:12px;color:#A8B8D8;transition:all .3s}
+  .signal.active{border-color:#00C2FF;color:#00C2FF;background:#001830}
+  .signal .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+  /* recommendation fork */
+  .fork{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  .fork-option{background:#0D1B40;border:2px solid #1B3F8B;border-radius:12px;padding:18px;cursor:pointer;transition:all .2s;position:relative}
+  .fork-option:hover{border-color:#A8B8D8;transform:translateY(-2px)}
+  .fork-option.recommended{border-color:#00C2FF}
+  .fork-option.selected{border-color:#00D68F;background:#001a0f}
+  .fork-option .rec-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#00C2FF;color:#0D1B40;font-size:10px;font-weight:800;padding:2px 10px;border-radius:10px;white-space:nowrap}
+  .fork-option h3{font-size:15px;margin-bottom:6px}
+  .fork-option .sub{font-size:12px;color:#A8B8D8;line-height:1.5}
+  .fork-option .meta{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .meta-pill{font-size:11px;padding:3px 9px;border-radius:10px;border:1px solid}
+
+  /* workflow scaffold */
+  .workflow{margin-top:16px}
+  .wf-step{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid #1B3F8B}
+  .wf-step:last-child{border-bottom:none}
+  .step-num{min-width:28px;height:28px;border-radius:50%;background:#1B3F8B;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#00C2FF}
+  .step-body h4{font-size:13px;font-weight:600;margin-bottom:3px}
+  .step-body p{font-size:12px;color:#A8B8D8}
+  .step-status{margin-left:auto;font-size:11px;padding:2px 8px;border-radius:8px}
+  .status-auto{background:#001830;color:#00C2FF;border:1px solid #00C2FF}
+  .status-review{background:#1a1000;color:#FFAE00;border:1px solid #FFAE00}
+
+  /* metrics panel */
+  .metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .metric-card{background:#0D1B40;border:1px solid #1B3F8B;border-radius:10px;padding:16px;text-align:center}
+  .metric-val{font-size:28px;font-weight:700;color:#00C2FF}
+  .metric-label{font-size:11px;color:#A8B8D8;margin-top:4px}
+  .metric-trend{font-size:11px;margin-top:6px;padding:2px 8px;border-radius:8px;display:inline-block}
+  .trend-up{background:#001a0f;color:#00D68F;border:1px solid #00D68F}
+  .trend-down{background:#1a0a00;color:#FFAE00;border:1px solid #FFAE00}
+
+  /* persona toggle */
+  .persona-bar{display:flex;gap:8px;margin-bottom:16px}
+  .persona-btn{flex:1;padding:10px;border:1px solid #1B3F8B;border-radius:8px;background:transparent;color:#A8B8D8;font-size:12px;cursor:pointer;transition:all .2s}
+  .persona-btn.active{background:#1B3F8B;color:#fff;border-color:#00C2FF}
+
+  /* explainability note */
+  .explain-box{background:#001830;border:1px solid #00C2FF;border-radius:8px;padding:12px 16px;margin-top:12px;font-size:12px;color:#A8B8D8;line-height:1.6}
+  .explain-box strong{color:#00C2FF}
+
+  /* hidden */
+  .hidden{display:none}
+
+  /* progress bar */
+  .progress-bar{height:4px;background:#1B3F8B;border-radius:4px;margin:10px 0;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,#1B3F8B,#00C2FF);transition:width .5s ease;border-radius:4px}
+
+  .section-title{font-size:13px;font-weight:600;color:#A8B8D8;margin-bottom:12px;text-transform:uppercase;letter-spacing:.8px}
+
+  .examples{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+  .example-chip{background:#0D1B40;border:1px solid #1B3F8B;border-radius:8px;padding:8px 14px;font-size:12px;color:#A8B8D8;cursor:pointer;transition:all .2s;text-align:left}
+  .example-chip:hover{border-color:#00C2FF;color:#fff}
+
+  .save-btn{width:100%;padding:12px;background:transparent;border:1.5px solid #00D68F;color:#00D68F;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;margin-top:12px;transition:all .2s}
+  .save-btn:hover{background:#001a0f}
+  .save-banner{display:flex;align-items:center;gap:10px;background:#001a0f;border:1px solid #00D68F;border-radius:8px;padding:12px 16px;font-size:13px;color:#00D68F;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo">Claude <span>Blueprint</span></div>
+    <div class="badge">MVP Prototype</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('demo')">Live Demo</button>
+    <button class="tab" onclick="switchTab('personas')">User Personas</button>
+    <button class="tab" onclick="switchTab('metrics')">Success Metrics</button>
+  </div>
+
+  <!-- DEMO TAB -->
+  <div id="tab-demo">
+    <div class="demo-card">
+      <div class="demo-label">Try it — type any task below</div>
+      <div class="examples">
+        <button class="example-chip" onclick="loadExample(0)">Analyse my Q3 sales data and flag the top 5 anomalies every Monday</button>
+        <button class="example-chip" onclick="loadExample(1)">Extract all email addresses from this CSV and format as JSON weekly</button>
+        <button class="example-chip" onclick="loadExample(2)">What is the capital of France?</button>
+        <button class="example-chip" onclick="loadExample(3)">Write a summary of this document for me</button>
+      </div>
+      <div class="input-wrap">
+        <textarea id="user-input" rows="3" placeholder="Describe your task..."></textarea>
+        <button class="btn-analyse" onclick="analyse()">Analyse →</button>
+      </div>
+      <div class="signals" id="signals-row">
+        <div class="signal" id="sig-repeat"><div class="dot"></div>Repetition</div>
+        <div class="signal" id="sig-multi"><div class="dot"></div>Multi-step</div>
+        <div class="signal" id="sig-struct"><div class="dot"></div>Structured output</div>
+        <div class="signal" id="sig-data"><div class="dot"></div>Data extraction</div>
+        <div class="signal" id="sig-simple"><div class="dot"></div>Simple lookup</div>
+      </div>
+    </div>
+
+    <div id="fork-section" class="hidden">
+      <div class="demo-label" style="margin-bottom:10px">Blueprint Recommendation</div>
+      <div class="fork">
+        <div class="fork-option" id="opt-chat" onclick="selectOption('chat')">
+          <h3>Quick Chat</h3>
+          <div class="sub">One-off answer. Fast. No structure saved. Best for simple lookups and single questions.</div>
+          <div class="meta">
+            <div class="meta-pill" style="color:#A8B8D8;border-color:#1B3F8B">Fast</div>
+            <div class="meta-pill" style="color:#A8B8D8;border-color:#1B3F8B">~Low tokens</div>
+          </div>
+        </div>
+        <div class="fork-option" id="opt-workflow" onclick="selectOption('workflow')">
+          <h3>Workflow</h3>
+          <div class="sub">Structured, repeatable execution. Save as a Blueprint template for future reuse.</div>
+          <div class="meta">
+            <div class="meta-pill" style="color:#00C2FF;border-color:#00C2FF">Repeatable</div>
+            <div class="meta-pill" style="color:#00D68F;border-color:#00D68F">Cost estimate</div>
+          </div>
+        </div>
+      </div>
+      <div id="explain-area" class="hidden"></div>
+    </div>
+
+    <div id="workflow-section" class="hidden">
+      <div class="demo-card" style="margin-top:16px">
+        <div class="demo-label">Auto-Generated Workflow Scaffold</div>
+        <div class="progress-bar"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+        <div class="workflow" id="wf-steps"></div>
+        <div id="save-area" class="hidden">
+          <button class="save-btn" onclick="saveBlueprint()">Save as Blueprint Template</button>
+          <div id="save-banner" class="hidden save-banner">
+            ✓  Blueprint saved! You can reuse this workflow from your saved templates.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERSONAS TAB -->
+  <div id="tab-personas" class="hidden">
+    <div class="persona-bar">
+      <button class="persona-btn active" onclick="setPersona(0)">Aarav, 22 — CS Student</button>
+      <button class="persona-btn" onclick="setPersona(1)">Priya, 31 — Data Analyst</button>
+    </div>
+    <div class="demo-card" id="persona-card"></div>
+  </div>
+
+  <!-- METRICS TAB -->
+  <div id="tab-metrics" class="hidden">
+    <div class="demo-card" style="margin-bottom:16px">
+      <div class="section-title">North Star & Guardrail</div>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-val">34%</div>
+          <div class="metric-label">Workflow Adoption Rate</div>
+          <div class="metric-trend trend-up">↑ +8% WoW (North Star)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val">1.4x</div>
+          <div class="metric-label">Avg Retries per Task</div>
+          <div class="metric-trend trend-up">↓ from 3.2x (Guardrail ✓)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val">61%</div>
+          <div class="metric-label">Blueprint CTR</div>
+          <div class="metric-trend trend-up">↑ Leading metric</div>
+        </div>
+      </div>
+    </div>
+    <div class="demo-card">
+      <div class="section-title">Full Metrics Dashboard</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div id="metric-rows"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const EXAMPLES = [
+  {text:"Analyse my Q3 sales data and flag the top 5 anomalies every Monday", signals:["repeat","multi","struct","data"], rec:"workflow"},
+  {text:"Extract all email addresses from this CSV and format as JSON weekly", signals:["repeat","data","struct"], rec:"workflow"},
+  {text:"What is the capital of France?", signals:["simple"], rec:"chat"},
+  {text:"Write a summary of this document for me", signals:[], rec:"chat"}
+];
+
+const WORKFLOWS = {
+  0:[
+    {title:"Load data source",desc:"Connect to your sales data CSV or database",status:"auto"},
+    {title:"Run anomaly detection",desc:"Apply statistical threshold model to identify outliers",status:"auto"},
+    {title:"Rank top 5 anomalies",desc:"Sort by deviation score and extract top results",status:"auto"},
+    {title:"Format output report",desc:"Structure findings in your preferred format (table / JSON)",status:"review"},
+    {title:"Schedule weekly trigger",desc:"Set recurrence: every Monday 9am",status:"review"}
+  ],
+  1:[
+    {title:"Parse CSV input",desc:"Read and validate the uploaded file",status:"auto"},
+    {title:"Extract email patterns",desc:"Apply regex to identify all valid email strings",status:"auto"},
+    {title:"Deduplicate results",desc:"Remove duplicate entries",status:"auto"},
+    {title:"Format as JSON",desc:"Structure: [{email, row_number, domain}]",status:"auto"},
+    {title:"Schedule weekly run",desc:"Auto-trigger each Monday with new file input",status:"review"}
+  ]
+};
+
+const PERSONAS = [
+  {
+    name:"Aarav, 22",
+    role:"CS Student · Daily AI user",
+    quote:'"I just type and hope for the best. I have no idea if I should be using a workflow or not."',
+    pains:["Stuck at simple prompts for complex tasks","Retries prompts 4-6× per assignment","Never discovered Workflows exist"],
+    goal:"Get quality outputs faster for coding assignments and research projects",
+    howBlueprint:"Blueprint detects when Aarav's task needs structure and shows him the Workflow option for the first time — removing the discovery barrier entirely.",
+    col:"#00C2FF"
+  },
+  {
+    name:"Priya, 31",
+    role:"Data Analyst · Daily AI user at work",
+    quote:'"I know there\'s a better way to automate this but every time I try to set it up I waste 30 minutes and give up."',
+    pains:["Inconsistent results from ad-hoc prompts","Can't predict token cost before running","No reusable workflow structure across her team"],
+    goal:"Repeatable, cost-predictable AI outputs for weekly reporting tasks",
+    howBlueprint:"Blueprint shows Priya a pre-execution cost estimate and auto-scaffolds her weekly report workflow. She saves it as a team Blueprint template.",
+    col:"#FFAE00"
+  }
+];
+
+const METRIC_ROWS = [
+  {type:"Acquisition",metric:"# users exposed to Blueprint recommendation",kind:"Leading"},
+  {type:"Activation",metric:"Blueprint recommendation CTR (click rate)",kind:"Leading"},
+  {type:"Adoption",metric:"Workflow Adoption Rate — % complex prompts → Workflow",kind:"North Star"},
+  {type:"Engagement",metric:"Avg. Workflow runs per user per week",kind:"Leading"},
+  {type:"Retention",metric:"% users who re-use a saved Blueprint template",kind:"Lagging"},
+  {type:"Revenue",metric:"Blueprint-driven Pro/Team upgrade conversion rate",kind:"Lagging"}
+];
+
+let currentExample = -1;
+
+function switchTab(t){
+  ['demo','personas','metrics'].forEach(id=>{
+    document.getElementById('tab-'+id).classList.toggle('hidden',id!==t);
+  });
+  document.querySelectorAll('.tab').forEach((el,i)=>{
+    el.classList.toggle('active',['demo','personas','metrics'][i]===t);
+  });
+  if(t==='personas') renderPersona(0);
+  if(t==='metrics') renderMetrics();
+}
+
+function loadExample(i){
+  currentExample = i;
+  document.getElementById('user-input').value = EXAMPLES[i].text;
+  setTimeout(()=>analyse(i),50);
+}
+
+function analyse(forceIdx){
+  const idx = forceIdx !== undefined ? forceIdx : currentExample;
+  const text = document.getElementById('user-input').value.trim();
+  if(!text) return;
+
+  const ex = idx>=0 ? EXAMPLES[idx] : detectSignals(text);
+  
+  ['repeat','multi','struct','data','simple'].forEach(s=>{
+    const el = document.getElementById('sig-'+s);
+    el.classList.toggle('active', ex.signals.includes(s));
+  });
+
+  const fork = document.getElementById('fork-section');
+  fork.classList.remove('hidden');
+
+  const chatOpt = document.getElementById('opt-chat');
+  const wfOpt = document.getElementById('opt-workflow');
+  chatOpt.classList.remove('recommended','selected');
+  wfOpt.classList.remove('recommended','selected');
+  document.querySelectorAll('.rec-badge').forEach(b=>b.remove());
+
+  if(ex.rec === 'workflow'){
+    const badge = document.createElement('div');
+    badge.className='rec-badge';
+    badge.textContent='⭐ Blueprint recommends';
+    wfOpt.appendChild(badge);
+    wfOpt.classList.add('recommended');
+  } else {
+    const badge = document.createElement('div');
+    badge.className='rec-badge';
+    badge.style.background='#A8B8D8';
+    badge.textContent='Blueprint recommends';
+    chatOpt.appendChild(badge);
+    chatOpt.classList.add('recommended');
+  }
+
+  const explainArea = document.getElementById('explain-area');
+  explainArea.classList.remove('hidden');
+  const reasons = [];
+  if(ex.signals.includes('repeat')) reasons.push('temporal keywords detected ("every Monday", "weekly")');
+  if(ex.signals.includes('multi')) reasons.push('multi-step logic detected');
+  if(ex.signals.includes('data')) reasons.push('data extraction intent detected');
+  if(ex.signals.includes('struct')) reasons.push('structured output requested');
+  if(ex.signals.includes('simple')) reasons.push('simple lookup — no structure needed');
+  const note = reasons.length ? `<strong>Why this recommendation:</strong> ${reasons.join(', ')}.` : '<strong>No strong signals detected</strong> — defaulting to Quick Chat.';
+  explainArea.innerHTML = `<div class="explain-box">${note} <span style="color:#A8B8D8">Override anytime by clicking the other option.</span></div>`;
+
+  document.getElementById('workflow-section').classList.add('hidden');
+}
+
+function detectSignals(text){
+  const t = text.toLowerCase();
+  const sigs = [];
+  if(/every|weekly|daily|monday|tuesday|wednesday|thursday|friday|recurring/.test(t)) sigs.push('repeat');
+  if(/first.*then|step|after|before|and then|finally/.test(t)) sigs.push('multi');
+  if(/json|table|csv|format|structure|extract/.test(t)) sigs.push('struct');
+  if(/extract|pull|find all|get all|parse/.test(t)) sigs.push('data');
+  if(sigs.length===0) sigs.push('simple');
+  return {signals:sigs, rec: sigs.includes('simple') ? 'chat' : 'workflow'};
+}
+
+function selectOption(opt){
+  document.getElementById('opt-chat').classList.remove('selected');
+  document.getElementById('opt-workflow').classList.remove('selected');
+  document.getElementById('opt-'+opt).classList.add('selected');
+
+  const wfSection = document.getElementById('workflow-section');
+  if(opt==='workflow'){
+    wfSection.classList.remove('hidden');
+    renderWorkflow();
+  } else {
+    wfSection.classList.add('hidden');
+  }
+}
+
+function renderWorkflow(){
+  const idx = currentExample >= 0 && WORKFLOWS[currentExample] ? currentExample : 0;
+  const steps = WORKFLOWS[idx];
+  const container = document.getElementById('wf-steps');
+  container.innerHTML = steps.map((s,i)=>`
+    <div class="wf-step">
+      <div class="step-num">${i+1}</div>
+      <div class="step-body" style="flex:1">
+        <h4>${s.title}</h4>
+        <p>${s.desc}</p>
+      </div>
+      <div class="step-status ${s.status==='auto'?'status-auto':'status-review'}">${s.status==='auto'?'Auto':'Review'}</div>
+    </div>
+  `).join('');
+
+  const prog = document.getElementById('prog');
+  prog.style.width='0%';
+  setTimeout(()=>prog.style.width='100%',100);
+  document.getElementById('save-area').classList.remove('hidden');
+  document.getElementById('save-banner').classList.add('hidden');
+}
+
+function saveBlueprint(){
+  document.getElementById('save-banner').classList.remove('hidden');
+}
+
+function setPersona(i){
+  document.querySelectorAll('.persona-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+  renderPersona(i);
+}
+
+function renderPersona(i){
+  const p = PERSONAS[i];
+  document.getElementById('persona-card').innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+      <div style="width:48px;height:48px;border-radius:50%;background:#1B3F8B;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:${p.col}">${p.name[0]}</div>
+      <div>
+        <div style="font-size:17px;font-weight:700">${p.name}</div>
+        <div style="font-size:12px;color:#A8B8D8;margin-top:2px;font-style:italic">${p.role}</div>
+      </div>
+    </div>
+    <div style="background:#0D1B40;border-left:3px solid ${p.col};padding:12px 16px;border-radius:0 8px 8px 0;font-size:13px;color:#A8B8D8;margin-bottom:18px;font-style:italic">${p.quote}</div>
+    <div style="margin-bottom:14px">
+      <div class="section-title">Pain Points</div>
+      ${p.pains.map(pain=>`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #1B3F8B;font-size:13px;color:#ccc"><div style="width:6px;height:6px;border-radius:50%;background:#FF4F6B;flex-shrink:0"></div>${pain}</div>`).join('')}
+    </div>
+    <div style="margin-bottom:14px">
+      <div class="section-title">Goal</div>
+      <div style="font-size:13px;color:#A8B8D8">${p.goal}</div>
+    </div>
+    <div style="background:#001830;border:1px solid ${p.col};border-radius:8px;padding:14px 16px">
+      <div style="font-size:11px;font-weight:700;color:${p.col};margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px">How Blueprint helps</div>
+      <div style="font-size:13px;color:#A8B8D8;line-height:1.6">${p.howBlueprint}</div>
+    </div>
+  `;
+}
+
+function renderMetrics(){
+  document.getElementById('metric-rows').innerHTML = METRIC_ROWS.map(m=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #1B3F8B">
+      <div style="min-width:90px;font-size:11px;color:#A8B8D8">${m.type}</div>
+      <div style="flex:1;font-size:13px;color:#ccc">${m.metric}</div>
+      <div style="font-size:11px;padding:3px 10px;border-radius:10px;white-space:nowrap;${m.kind==='North Star'?'background:#001830;color:#00C2FF;border:1px solid #00C2FF':m.kind==='Leading'?'background:#132252;color:#A8B8D8;border:1px solid #1B3F8B':'background:#1a1000;color:#FFAE00;border:1px solid #FFAE00'}">${m.kind}</div>
+    </div>
+  `).join('');
+}
+</script>
+</body>
+</html>
